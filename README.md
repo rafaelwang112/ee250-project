@@ -3,7 +3,7 @@
 - Robert Fan (USC ID: 7072371273)
 
 ## Program Execution
-###Client Side
+### Client Side
 Encode the images from the Images folder to generate the files in Data folder using: 
 ```bash
 python3 encode_faces.py
