@@ -28,3 +28,6 @@ numpy
 face_recognition
 flask
 datetime
+
+### LLM Usage
+Prompts can be found in prompts.txt
