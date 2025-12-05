@@ -11,10 +11,20 @@ python3 encode_faces.py
 Then, run the Yolo Webcome using:
 ```bash
 python3 yolo_detector.py
-``` 
+```
+
+### Server Side
+Retrieve the json format message from the client side and disect the info:
+```
+python server.py
+```
+The address of dashboard can be viewed in the terminal after starting the server
+
 ## External Libraries Used
 ultralytics
 opencv-python
 requests
 numpy
 face_recognition
+flask
+datetime
