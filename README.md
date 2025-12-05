@@ -21,13 +21,13 @@ python server.py
 The address of dashboard can be viewed in the terminal after starting the server
 
 ## External Libraries Used
-ultralytics
-opencv-python
-requests
-numpy
-face_recognition
-flask
-datetime
+- ultralytics
+- opencv-python
+- requests
+- numpy
+- face_recognition
+- flask
+- datetime
 
 ### LLM Usage
 Prompts can be found in prompts.txt
