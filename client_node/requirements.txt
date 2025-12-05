@@ -1,5 +1,0 @@
-ultralytics
-opencv-python
-requests
-numpy
-face_recognition
