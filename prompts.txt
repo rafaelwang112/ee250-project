@@ -1,1 +1,9 @@
+Prompts Used: 
+In my frame_data, lets also send the frame image with the person and the objects (like knife whatever), because then when the server receives it it can display it on the visualization.
+
+Could you write me a website that fullfill our needs: Showing live status of the situation, the events log for per person, dangerous list that contains all people marked as danger, and image history to show the face of the threats.
+
+Give me a button to delete the threat from the threat list. 
+
+Could you make the webiste more professional and technical?
 
