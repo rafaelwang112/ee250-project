@@ -31,7 +31,6 @@ The address of dashboard can be viewed in the terminal after starting the server
 - numpy
 - face_recognition
 - flask
-- datetime
 
 ## LLM Usage
 Prompts can be found in prompts.txt
