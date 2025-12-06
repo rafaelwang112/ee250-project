@@ -3,6 +3,7 @@
 - Robert Fan (USC ID: 7072371273)
 
 ## Program Execution
+Client and server should be on the same local network.
 ### Client Side
 Encode the images from the Images folder to generate the files in Data folder using: 
 ```bash
