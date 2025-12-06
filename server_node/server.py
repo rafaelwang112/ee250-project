@@ -127,7 +127,7 @@ def describe_event_like(persons, objs, severity):
             if num_unknown >= 1:
                 return "An unknown person is holding a weapon. DANGER."
             if friend_names:
-                return f"Your friend {friend_names[0]} is holding a weapon. DANGER."
+                return f"Your friend {friend_names[0]} is holding weapon. DANGER."
             return "Someone is holding a weapon. DANGER."
         else:
             if friend_names:
@@ -138,14 +138,14 @@ def describe_event_like(persons, objs, severity):
         if friend_names:
             return f"Your friend {friend_names[0]} is delivering a package."
         if num_unknown >= 1:
-            return "Someone is delivering a package."
+            return "Someone is delivering a package"
         return "A package is at your door."
     # Visitor
     if num_people >= 1:
         if friend_names:
             return f"Your friend {friend_names[0]} is standing at your door."
         if num_unknown == 1:
-            return "An unknown person is standing at your door."
+            return "A unknown person is standing at your door."
         if num_unknown > 1:
             return "Multiple unknown people are standing at your door."
     return "No one is at your door."
