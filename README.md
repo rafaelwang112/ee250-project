@@ -2,6 +2,9 @@
 - Rafael Wang (USC ID: 6189106477)
 - Robert Fan (USC ID: 7072371273)
 
+## Presentation Video
+https://www.youtube.com/watch?v=UOMBkznN_IM
+
 ## Program Execution
 Client and server should be on the same local network.
 ### Client Side
