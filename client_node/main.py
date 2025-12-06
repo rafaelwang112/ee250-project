@@ -38,7 +38,6 @@ def run_yolo(frame):
                 }
             }
         detections.append(detection)
-            
     return detections
 
 if __name__ == "__main__":
@@ -55,7 +54,6 @@ if __name__ == "__main__":
             ret, frame = cap.read()
             if not ret:
                 break
-
             frame_id += 1
             current_time = datetime.datetime.now().isoformat()
             dets = run_yolo(frame)
@@ -67,7 +65,6 @@ if __name__ == "__main__":
                 person_info = classify_person(frame, person_bbox)
             else:
                 person_info = {"type": "unknown", "name": None, "distance": None}
-
             encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 50]
             _, buffer = cv2.imencode('.jpg', frame, encode_param)
             jpg_as_text = base64.b64encode(buffer).decode('utf-8') #GitHub CoPilot (Gemini 3 Pro model) was used to generate this
@@ -92,7 +89,6 @@ if __name__ == "__main__":
                     print(f"Error sending: {e}")
             if start_log:
                 json_data.append(frame_data)
-
             for d in dets:
                 bbox = d["bbox"]
                 x_c, y_c, w, h = bbox["x_center"], bbox["y_center"], bbox["width"], bbox["height"]
