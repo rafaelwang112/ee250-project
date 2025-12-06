@@ -18,7 +18,7 @@ python3 main.py
 ```
 
 ### Server Side
-Retrieve the json format message from the client side and disect the info:
+Retrieve the json format message from the client side and dissect the info:
 ```
 python server.py
 ```
