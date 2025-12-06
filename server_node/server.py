@@ -1,8 +1,6 @@
 from flask import Flask, request, jsonify, send_from_directory
 import os, json, base64
 from datetime import datetime
-from typing import Dict, Any, List
-
 from dashboard import register_dashboard_routes
 from config import (
     EVENTS_DIR,
@@ -12,67 +10,54 @@ from config import (
     BOX_THRESH,
     WEAPON_THRESH,
     WEAPON_CLASSES,
-    THREAT_MIN_DURATION_SEC,   # not used in this simplified version but kept for config compatibility
-    THREAT_COOLDOWN_SEC,       # not used here either
+    
 )
 
 app = Flask(__name__)
+
 os.makedirs(EVENTS_DIR, exist_ok=True)
 os.makedirs(TMP_DIR, exist_ok=True)
 
-event_history: List[Dict[str, Any]] = []
+event_history= []
 next_event_id = 1
 
 # names that have ever been seen (for "new_person" flag)
-known_person_ids: set[str] = set()
+known_person_ids = set()
 
 # blacklist
-dangerous_persons: set[str] = set()
+dangerous_persons = set()
 if os.path.exists(DANGER_LIST_FILE):
     try:
         dangerous_persons = set(json.load(open(DANGER_LIST_FILE)))
     except Exception:
         dangerous_persons = set()
 
-# what the dashboard & client see as "latest status"
-last_status: Dict[str, Any] = {
-    "current_state": "idle",          # idle | event_active | threat_active
+last_status = {
+    "current_state": "idle",        
     "danger": False,
     "needs_attention": False,
-
     "last_event_id": None,
     "last_event_type": None,
     "last_event_caption": None,
     "last_event_severity": "normal",
     "latest_snapshot_url": None,
-
-    # live caption for the *current* frame
     "live_caption": None,
-
-    # real-time threat info
-    "threat_flag": False,            # True if current frame has a weapon
-    "threat_image": None,            # URL of snapshot (for dashboard)
-    "threat_name": None,             # e.g. "Bob" or "danger_7"
-
-    # new-person + snapshot back to YOLO client
-    "new_person": False,             # True if this is first time we saw this person_id
-    "person_id": None,               # name or synthetic id
-    "person_snapshot_b64": None,     # base64 of snapshot (only when new_person=True)
-
-    # snapshot that caused this threat (always base64 when threat_flag=True)
+    "threat_flag": False,         
+    "threat_image": None,          
+    "threat_name": None,           
+    "new_person": False,           
+    "person_id": None,              
+    "person_snapshot_b64": None,    
     "threat_snapshot_b64": None,
-
-    # threat history: list of snapshot URLs for all threat events
     "threat_history": [],
 }
 
 
-def parse_iso(ts: str) -> datetime:
+def parse_iso(ts):
     try:
         return datetime.fromisoformat(ts.replace("Z", "+00:00"))
     except Exception:
         return datetime.utcnow()
-
 
 def normalize_person_list(p):
     if p is None:
@@ -83,24 +68,19 @@ def normalize_person_list(p):
         return [p]
     return []
 
-
 def compute_flags(dets):
-    """Check for person / box / weapon."""
     has_person = False
     has_box = False
     has_weapon = False
-
     for d in dets:
         cname = d.get("class_name")
         conf = float(d.get("confidence", 0.0))
-
         if cname == "person" and conf >= PERSON_THRESH:
             has_person = True
         if cname in ("box", "backpack", "package") and conf >= BOX_THRESH:
             has_box = True
         if cname in WEAPON_CLASSES and conf >= WEAPON_THRESH:
             has_weapon = True
-
     return {
         "has_person": has_person,
         "has_box": has_box,
@@ -109,20 +89,16 @@ def compute_flags(dets):
 
 
 def compute_severity(flags, persons):
-    """normal / attention / danger for this frame's event."""
     has_weapon = flags["has_weapon"]
     has_person = flags["has_person"]
-
     if not has_weapon or not has_person:
         return "normal"
-
     any_unknown = any(p.get("type") != "friend" for p in persons) if persons else True
     any_blacklisted = any(
         (p.get("name") or "").lower() in dangerous_persons
         for p in persons
         if p.get("name")
     )
-
     if any_unknown or any_blacklisted:
         return "danger"
     else:
@@ -145,7 +121,6 @@ def describe_event_like(persons, objs, severity):
 
     friend_names = [p.get("name") for p in persons if p.get("type") == "friend" and p.get("name")]
     num_unknown = sum(1 for p in persons if p.get("type") != "friend")
-
     # Threat
     if has_weapon:
         if severity == "danger":
@@ -158,7 +133,6 @@ def describe_event_like(persons, objs, severity):
             if friend_names:
                 return f"Your friend {friend_names[0]} is holding a potential weapon. Pay attention."
             return "Someone is holding a potential weapon. Pay attention."
-
     # Delivery
     if has_box:
         if friend_names:
@@ -166,7 +140,6 @@ def describe_event_like(persons, objs, severity):
         if num_unknown >= 1:
             return "Someone is delivering a package."
         return "A package is at your door."
-
     # Visitor
     if num_people >= 1:
         if friend_names:
@@ -175,9 +148,7 @@ def describe_event_like(persons, objs, severity):
             return "An unknown person is standing at your door."
         if num_unknown > 1:
             return "Multiple unknown people are standing at your door."
-
     return "No one is at your door."
-
 
 def decide_event_type(flags):
     if not flags["has_person"]:
@@ -188,17 +159,15 @@ def decide_event_type(flags):
         return "delivery"
     return "visitor"
 
-
-def next_id() -> int:
+def next_id():
     global next_event_id
     eid = next_event_id
     next_event_id += 1
     return eid
 
 
-def handle_frame(frame: Dict[str, Any]) -> None:
+def handle_frame(frame):
     global event_history, last_status, known_person_ids, dangerous_persons
-
     ts = parse_iso(frame["timestamp"])
     detections = frame.get("detections", [])
     persons = normalize_person_list(frame.get("person_info"))
@@ -207,18 +176,15 @@ def handle_frame(frame: Dict[str, Any]) -> None:
     severity = compute_severity(flags, persons)
     live_caption = describe_event_like(persons, objs, severity)
     event_type = decide_event_type(flags)
-
     person_key = None
     if persons:
         p0 = persons[0]
         if p0.get("name"):
             person_key = p0["name"].lower()
-
     new_person = False
     snapshot_rel_path = None
     snapshot_b64 = None
-    new_event: Dict[str, Any] | None = None
-
+    new_event = None
     if event_type is not None:
         eid = next_id()
 
@@ -250,7 +216,6 @@ def handle_frame(frame: Dict[str, Any]) -> None:
             "caption": live_caption,
         }
         event_history.append(new_event)
-
         last_status["last_event_id"] = eid
         last_status["last_event_type"] = event_type
         last_status["last_event_caption"] = live_caption
@@ -261,7 +226,6 @@ def handle_frame(frame: Dict[str, Any]) -> None:
             if person_key not in known_person_ids:
                 known_person_ids.add(person_key)
                 new_person = True
-
     if flags["has_weapon"]:
         last_status["current_state"] = "threat_active"
     elif flags["has_person"]:
@@ -285,7 +249,6 @@ def handle_frame(frame: Dict[str, Any]) -> None:
             if p.get("name"):
                 name = p["name"]
                 break
-
         if name:
             last_status["threat_name"] = name
             dangerous_persons.add(name.lower())
@@ -305,19 +268,16 @@ def handle_frame(frame: Dict[str, Any]) -> None:
     last_status["new_person"] = new_person
     last_status["person_id"] = person_key
     last_status["person_snapshot_b64"] = snapshot_b64 if new_person else None
-
     if last_status["threat_flag"]:
         last_status["threat_snapshot_b64"] = snapshot_b64
     else:
         last_status["threat_snapshot_b64"] = None
-
     threat_urls = [
         ev["snapshot_path"]
         for ev in event_history
         if ev.get("event_type") == "threat" and ev.get("snapshot_path")
     ]
     last_status["threat_history"] = list(reversed(threat_urls))
-
     try:
         with open(DANGER_LIST_FILE, "w") as f:
             json.dump(sorted(list(dangerous_persons)), f, indent=2)
@@ -325,7 +285,6 @@ def handle_frame(frame: Dict[str, Any]) -> None:
         pass
 
 # This part is made from GPT 
-
 @app.route("/frame_result", methods=["POST"])
 def frame_result():
     """
