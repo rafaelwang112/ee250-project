@@ -33,5 +33,5 @@ The address of dashboard can be viewed in the terminal after starting the server
 - flask
 - datetime
 
-### LLM Usage
+## LLM Usage
 Prompts can be found in prompts.txt
