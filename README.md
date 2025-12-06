@@ -12,9 +12,9 @@ Encode the images from the Images folder to generate the files in Data folder us
 ```bash
 python3 encode_faces.py
 ```  
-Then, run the Yolo webcam using:
+Then, run the webcam using:
 ```bash
-python3 yolo_detector.py
+python3 main.py
 ```
 
 ### Server Side
